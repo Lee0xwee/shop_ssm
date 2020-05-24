@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--加载jdbc.properties文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--数据源使用c3p0 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+
+    <!--配置sqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+
+        <!--数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--别名-->
+        <property name="typeAliasesPackage" value="cn.Lee.ssm.product.pojo,
+                    cn.Lee.ssm.category.pojo,cn.Lee.ssm.order.pojo"/>
+
+    </bean>
+
+
+    <!--mapper批量扫描-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+
+        <!--扫描包路径，如果需要扫描多个包，用,隔开-->
+        <property name="basePackage" value="cn.Lee.ssm.user.mapper,
+        cn.Lee.ssm.category.mapper,cn.Lee.ssm.product.mapper,cn.Lee.ssm.order.mapper"/>
+
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+
+    </bean>
+
+
+</beans>

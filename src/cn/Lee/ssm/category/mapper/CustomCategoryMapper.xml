@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.Lee.ssm.category.mapper.CustomCategoryMapper">
+
+
+    <resultMap id="findAllResultMap" type="cn.Lee.ssm.category.pojo.CustomCategory">
+
+        <id column="cid" property="cid"/>
+        <result column="cname" property="cname"/>
+
+        <collection property="categoryseconds" ofType="cn.Lee.ssm.category.pojo.Categorysecond">
+            <id column="csid" property="csid"/>
+            <result column="csname" property="csname"/>
+            <result column="cid" property="cid"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="findAll" resultMap="findAllResultMap">
+
+       select *
+       from category
+       left join categorysecond c on category.cid = c.cid
+
+    </select>
+
+
+    <select id="findByPageCid" parameterType="QueryVo" resultType="Product">
+
+        select p.pid,
+               p.pname,
+               p.market_price marketPrice,
+               p.shop_price shopPrice,
+               p.image,
+               p.pdesc,
+               p.is_hot isHot,
+               p.pdate
+        from product p
+            left join categorysecond c on p.csid = c.csid
+            left join category c2 on c.cid = c2.cid
+        where c.cid = #{cid}
+        limit #{start},#{pageSize}
+
+    </select>
+
+    <select id="findCountCid" parameterType="QueryVo" resultType="int">
+
+        select count(*)
+        from product p
+            left join categorysecond c on p.csid = c.csid
+            left join category c2 on c.cid = c2.cid
+        where c.cid = #{cid}
+
+    </select>
+
+
+    <select id="findByPageCsid" parameterType="QueryVo" resultType="Product">
+
+        select p.pid,
+               p.pname,
+               p.market_price marketPrice,
+               p.shop_price shopPrice,
+               p.image,
+               p.pdesc,
+               p.is_hot isHot,
+               p.pdate
+        from product p
+            left join categorysecond c on p.csid = c.csid
+        where c.csid = #{csid}
+        limit #{start},#{pageSize}
+
+    </select>
+
+    <select id="findCountCsid" parameterType="QueryVo" resultType="int">
+
+        select count(*)
+        from product p
+            left join categorysecond c on p.csid = c.csid
+        where c.csid = #{csid}
+
+    </select>
+
+
+</mapper>

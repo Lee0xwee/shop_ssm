@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.Lee.ssm.order.mapper.CustomOrdersMapper">
+
+    <resultMap id="orderResultMap" type="cn.Lee.ssm.order.pojo.CustomOrder">
+
+        <id column="oid" property="oid"/>
+        <result column="total" property="total"/>
+        <result column="ordertime" property="ordertime"/>
+        <result column="state" property="state"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="addr" property="addr"/>
+
+        <!--一对多联系-->
+        <collection property="orderitems" ofType="cn.Lee.ssm.order.pojo.CustomOrderItem">
+
+            <id column="itemid" property="itemid"/>
+            <result column="count" property="count"/>
+            <result column="subtotal" property="subtotal"/>
+
+            <!--一对一联系-->
+            <association property="product" javaType="cn.Lee.ssm.product.pojo.Product">
+
+                <id column="pid" property="pid"/>
+                <result column="pname" property="pname"/>
+
+                <!--注意：column为生成的表中的字段名(非数据库表字段名)-->
+                <!--property对应javaBean实体类属性-->
+                <result column="shopPrice" property="shopPrice"/>
+                <result column="marketPrice" property="marketPrice"/>
+                <result column="image" property="image"/>
+                <result column="pdesc" property="pdesc"/>
+                <result column="isHot" property="isHot"/>
+                <result column="pdate" property="pdate"/>
+
+            </association>
+
+
+        </collection>
+
+    </resultMap>
+
+
+    <insert id="saveOrderItem" parameterType="cn.Lee.ssm.order.pojo.CustomOrderItem">
+
+        insert into orderitem (count, subtotal, pid, oid)
+        values (#{count},#{subtotal},#{product.pid},#{orders.oid})
+
+    </insert>
+
+    <insert id="saveOrder" parameterType="cn.Lee.ssm.order.pojo.CustomOrder">
+
+        <selectKey resultType="int" keyProperty="oid" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+        insert into orders (total, ordertime, state, name, phone, addr, uid)
+        values (#{total},#{ordertime},#{state},#{user.name},#{user.phone},#{user.addr},#{user.uid})
+
+    </insert>
+
+    <select id="findByPageUid" parameterType="QueryVo" resultMap="orderResultMap">
+
+       select o.oid oid,
+           o.total total,
+           o.state state,
+           o2.count 'count',
+           o2.subtotal subtotal,
+           p.pname,
+           p.shop_price shopPrice,
+           p.image image
+
+       from orders o
+       left join orderitem o2 on o.oid = o2.oid
+       left join product p on o2.pid = p.pid
+       where o.uid = #{uid}
+       order by ordertime desc
+       limit #{start},#{pageSize}
+
+    </select>
+
+    <select id="findCountUid" parameterType="QueryVo" resultType="int">
+
+        select count(*)
+        from orders o
+        left join orderitem o2 on o.oid = o2.oid
+        left join product p on o2.pid = p.pid
+        where o.uid = #{uid}
+
+    </select>
+
+    <select id="findByOid" parameterType="int" resultMap="orderResultMap">
+
+        select o.oid oid,
+           o.total total,
+           o2.count 'count',
+           o2.subtotal subtotal,
+           p.pname pname,
+           p.shop_price shopPrice,
+           p.image image
+        from orders o
+       left join orderitem o2 on o.oid = o2.oid
+       left join product p on o2.pid = p.pid
+       where o.oid = #{oid}
+
+    </select>
+
+</mapper>
